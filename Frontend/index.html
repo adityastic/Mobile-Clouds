@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>
+      Mobile Clouds - Dashboard
+    </title>
+    <!-- Favicon -->
+    <link href="assets/img/brand/favicon.png" rel="icon" type="image/png" />
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <link href="assets/js/plugins/nucleo/css/nucleo.css" rel="stylesheet" />
+    <link
+      href="assets/js/plugins/@fortawesome/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- CSS Files -->
+    <link href="assets/css/argon-dashboard.css?v=1.1.1" rel="stylesheet" />
+  </head>
+
+  <body class="">
+    <div class="main-content">
+      <!-- Navbar -->
+      <nav
+        class="navbar navbar-top navbar-expand-md navbar-dark"
+        id="navbar-main"
+      >
+        <div class="container-fluid">
+          <!-- Brand -->
+          <a
+            class="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
+            href="../index.html"
+            >Mobile Clouds Dashboard</a
+          >
+          <ul class="navbar-nav align-items-center d-none d-md-flex">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link pr-0"
+                href="#"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <div class="media align-items-center">
+                  <span class="avatar avatar-sm rounded-circle">
+                    <img
+                      alt="Image placeholder"
+                      src="assets/img/theme/team-4-800x800.jpg"
+                    />
+                  </span>
+                  <div class="media-body ml-2 d-none d-lg-block">
+                    <span class="mb-0 text-sm font-weight-bold"
+                      >Aditya Gupta</span
+                    >
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+      <!-- Header -->
+      <div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+        <div class="container-fluid">
+          <div class="header-body">
+            <!-- Card stats -->
+            <div class="row">
+              <div class="col-xl-3 col-lg-6">
+                <div class="card card-stats mb-4 mb-xl-0">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">
+                          Current Users
+                        </h5>
+                        <span
+                          class="h2 font-weight-bold mb-0"
+                          id="users-output"
+                        ></span>
+                      </div>
+                      <div class="col-auto">
+                        <div
+                          class="icon icon-shape bg-warning text-white rounded-circle shadow"
+                        >
+                          <i class="fas fa-chart-pie"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-lg-6">
+                <div class="card card-stats mb-4 mb-xl-0">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">
+                          Total Data Stored
+                        </h5>
+                        <span
+                          class="h2 font-weight-bold mb-0"
+                          id="size-output"
+                        ></span>
+                      </div>
+                      <div class="col-auto">
+                        <div
+                          class="icon icon-shape bg-info text-white rounded-circle shadow"
+                        >
+                          <i class="fas fa-percent"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid mt--7">
+        <div class="row">
+          <div class="col">
+            <div class="card shadow border-0">
+              <div id="map" style="height: 600px;"></div>
+              <!-- <div
+                id="map-canvas"
+                class="map-canvas"
+                style="height: 600px;"
+              ></div> -->
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <footer class="footer">
+          <div class="row align-items-center justify-content-xl-between">
+            <div class="col-xl-6">
+              <div class="copyright text-center text-xl-left text-muted">
+                &copy; 2020
+                <a
+                  href="https://www.github.com/adityastic"
+                  class="font-weight-bold ml-1"
+                  target="_blank"
+                  >Aditya Gupta</a
+                >
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <!--   Core   -->
+    <script src="assets/js/plugins/jquery/dist/jquery.min.js"></script>
+    <script src="assets/js/plugins/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!--   Optional JS   -->
+    <script src="https://maps.googleapis.com/maps/api/js?key="></script>
+    <!--   Argon JS   -->
+    <script src="assets/js/argon-dashboard.min.js?v=1.1.1"></script>
+    <script type="text/javascript">
+      $(window).on("load", function () {
+        $.ajax({
+          type: "GET",
+          async: false,
+          url: "http://localhost:5000/api/v1/getBasicInformation",
+          crossDomain: true,
+          success: function (result) {
+            console.log(result);
+            loadMap(result["locations"]);
+            $("#users-output").html(result["people"]);
+            $("#size-output").html(result["total_size"]);
+          },
+        });
+      });
+
+      function loadMap(locations) {
+        var avgLoc = averageGeolocation(locations);
+
+        console.log(avgLoc);
+
+        var map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 17,
+          center: new google.maps.LatLng(
+            avgLoc["latitude"],
+            avgLoc["longitude"]
+          ),
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+        });
+
+        var infowindow = new google.maps.InfoWindow();
+
+        var marker, i;
+
+        for (i = 0; i < locations.length; i++) {
+          marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+            map: map,
+          });
+
+          google.maps.event.addListener(
+            marker,
+            "click",
+            (function (marker, i) {
+              return function () {
+                infowindow.setContent(locations[i][0]);
+                infowindow.open(map, marker);
+              };
+            })(marker, i)
+          );
+        }
+      }
+
+      function averageGeolocation(locations) {
+        if (locations.length === 1) {
+          return locations[0][1];
+        }
+
+        let x = 0.0;
+        let y = 0.0;
+        let z = 0.0;
+
+        for (let i = 0; i < locations.length; i++) {
+          let latitude = (locations[i][1] * Math.PI) / 180;
+          let longitude = (locations[i][2] * Math.PI) / 180;
+
+          x += Math.cos(latitude) * Math.cos(longitude);
+          y += Math.cos(latitude) * Math.sin(longitude);
+          z += Math.sin(latitude);
+        }
+
+        let total = locations.length;
+
+        x = x / total;
+        y = y / total;
+        z = z / total;
+
+        let centralLongitude = Math.atan2(y, x);
+        let centralSquareRoot = Math.sqrt(x * x + y * y);
+        let centralLatitude = Math.atan2(z, centralSquareRoot);
+
+        return {
+          latitude: (centralLatitude * 180) / Math.PI,
+          longitude: (centralLongitude * 180) / Math.PI,
+        };
+      }
+    </script>
+  </body>
+</html>
